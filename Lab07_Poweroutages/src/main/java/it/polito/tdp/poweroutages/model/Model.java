@@ -7,12 +7,12 @@ import it.polito.tdp.poweroutages.DAO.PowerOutageDAO;
 
 public class Model {
 	
-	PowerOutageDAO podao;
+	private PowerOutageDAO podao;
 	private List<Nerc> nercList;
 	
 	public Model() {
 		podao = new PowerOutageDAO();
-		nercList = new ArrayList<>(podao.getNercList());
+		nercList = podao.getNercList();
 	}
 	
 	public List<Nerc> getNercList() {
