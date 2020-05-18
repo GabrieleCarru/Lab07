@@ -5,10 +5,12 @@
 package it.polito.tdp.poweroutages;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.poweroutages.model.Model;
 import it.polito.tdp.poweroutages.model.Nerc;
+import it.polito.tdp.poweroutages.model.PowerOutages;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -43,7 +45,49 @@ public class FXMLController {
 
     @FXML
     void analysisWorstCase(ActionEvent event) {
-
+    	
+    	txtResult.clear();
+    	
+    	try {
+    		Nerc selectedNerc = cmbNERC.getValue();
+    		if(selectedNerc == null) {
+    			txtResult.setText("Please select a Nerc (area identifier)");
+    			return;
+    		}
+    		
+    		int maxY = Integer.parseInt(txtMaxYears.getText());
+    		int maxH = Integer.parseInt(txtMaxHours.getText());
+    		int yearListSize = model.getYearsList().size();
+    		if(maxY <= 0 || maxY > yearListSize) {
+    			txtResult.setText("Please insert a number of years in range "
+    					+ "[1, ... " + yearListSize + "]");
+    			return;
+    		}
+    		
+    		if(maxH < 0) {
+    			txtResult.setText("Please insert a number bigger than 0.");
+    			return;
+    		}
+    		
+    		txtResult.setText(String.format("Computing the worst case analysis... "
+    				+ "for %d hours and %d years.", maxH, maxY));
+    		
+    		List<PowerOutages> worstCase = model.getWorstCase(maxY, maxH, selectedNerc);
+    		
+    		txtResult.clear();
+    		txtResult.appendText("Tot people affected: " + model.sumAffectedPeople(worstCase) + "\n");
+    		txtResult.appendText("Tot hours of outage: " + model.sumOutageHours(worstCase) + "\n");
+    		
+    		for(PowerOutages po : worstCase) {
+    			txtResult.appendText(String.format("%d %s %s %d %d", 
+    					po.getYear(), po.getOutageStart(), po.getOutageEnd(), 
+    					po.getOutageDuration(), po.getAffectedPeople()));
+    			txtResult.appendText("\n");
+    		}
+    		
+    	} catch(NumberFormatException e) {
+    		txtResult.setText("Insert a valid number of years and od hours.");
+    	}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
